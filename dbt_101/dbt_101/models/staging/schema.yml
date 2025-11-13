@@ -1,0 +1,28 @@
+version: 2
+models:
+  - name: stg_customers
+    description: Cleaned and standerdized customer data
+    columns:
+      - name: customer_id
+        description: Unique identifier for each customer
+        tests:
+          - unique
+          - not_null
+
+      - name: email
+        description: Customer email address
+        tests:
+          - not_null
+
+  - name: stg_orders
+    description: Cleaned and standardized order data
+    columns:
+      - name: order_id
+        description: Unique identifier for each order
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Foregin key to customers table
+        tests:
+          - not_null
