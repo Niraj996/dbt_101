@@ -226,3 +226,166 @@ For questions or feedback, please open an issue in this repository.
 This project is open source and available for educational purposes.
 
 Happy Data Transforming! 🚀
+
+Creating docker and inserting data 
+
+1.
+   # Update package list
+sudo apt update
+
+# Install Python 3 and pip
+sudo apt install python3 python3-pip python3-venv -y
+
+# Verify installation
+python3 --version
+pip3 --version
+
+2.
+   # Create and navigate to project directory
+mkdir ~/dbt_project
+cd ~/dbt_project
+
+3.
+    # Create virtual environment
+python3 -m venv dbt_venv
+
+# Activate virtual environment
+source dbt_venv/bin/activate
+
+4.
+   # Install dbt with PostgreSQL adapter
+pip install dbt-postgres
+
+# Verify installation
+dbt --version
+
+5. Create a Docker Network
+
+    docker network create dbt_network
+6.
+   docker run -d \
+  --name postgres_dbt \
+  --network dbt_network \
+  -e POSTGRES_USER=dbt_user \
+  -e POSTGRES_PASSWORD=dbt_password \
+  -e POSTGRES_DB=dbt_database \
+  -p 5432:5432 \
+  postgres:14
+
+7.
+   # Check container status
+docker ps
+
+# Connect to PostgreSQL to verify
+docker exec -it postgres_dbt psql -U dbt_user -d dbt_database
+
+8.
+   \l  -- List databases
+   \q  -- Quit
+
+9.
+    # Connect to PostgreSQL
+docker exec -it postgres_dbt psql -U dbt_user -d dbt_database
+
+10.
+    -- Create a schema for raw data
+CREATE SCHEMA IF NOT EXISTS raw_data;
+
+-- Create a customers table
+CREATE TABLE raw_data.customers (
+    customer_id SERIAL PRIMARY KEY,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    email VARCHAR(100),
+    signup_date DATE
+);
+
+-- Create an orders table
+CREATE TABLE raw_data.orders (
+    order_id SERIAL PRIMARY KEY,
+    customer_id INTEGER,
+    order_date DATE,
+    order_amount DECIMAL(10, 2),
+    status VARCHAR(20)
+);
+
+-- Insert sample customer data
+INSERT INTO raw_data.customers (first_name, last_name, email, signup_date) VALUES
+('John', 'Doe', 'john.doe@email.com', '2024-01-15'),
+('Jane', 'Smith', 'jane.smith@email.com', '2024-02-20'),
+('Bob', 'Johnson', 'bob.johnson@email.com', '2024-03-10'),
+('Alice', 'Williams', 'alice.w@email.com', '2024-04-05');
+
+-- Insert sample order data
+INSERT INTO raw_data.orders (customer_id, order_date, order_amount, status) VALUES
+(1, '2024-01-20', 150.00, 'completed'),
+(1, '2024-02-15', 200.00, 'completed'),
+(2, '2024-02-25', 75.50, 'completed'),
+(2, '2024-03-01', 120.00, 'pending'),
+(3, '2024-03-15', 300.00, 'completed'),
+(4, '2024-04-10', 50.00, 'cancelled');
+
+-- Verify data
+SELECT * FROM raw_data.customers;
+SELECT * FROM raw_data.orders;
+
+-- Exit PostgreSQL
+\q
+
+11.
+    # Make sure you're in the project directory with venv activated
+cd ~/dbt_101
+
+# Initialize dbt project
+dbt init dbt_101
+
+12 .
+cd dbt_101
+```
+
+### 3.3 Understand the Folder Structure
+```
+my_dbt_project/
+├── dbt_project.yml       # Main configuration file
+├── README.md             # Project documentation
+├── models/               # Where your SQL models live
+│   └── example/          # Example models (can be deleted)
+├── analyses/             # Ad-hoc queries
+├── tests/                # Custom data tests
+├── seeds/                # CSV files to load into database
+├── macros/               # Reusable SQL functions
+├── snapshots/            # Capture historical data changes
+└── .gitignore           # Git ignore file
+
+13.   
+# Create .dbt directory in home folder
+mkdir -p ~/.dbt
+
+# Create profiles.yml file
+nano ~/.dbt/profiles.yml
+
+14. 
+Add Configuration
+Paste the following into profiles.yml:
+
+dbt_101:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: dbt_user
+      password: dbt_password
+      port: 5432
+      dbname: dbt_database
+      schema: analytics
+      threads: 4
+      keepalives_idle: 0
+
+15.
+# Test if dbt can connect to the database
+dbt debug
+You should see All checks passed! at the end.
+
+Now create models fils as per above repo
+Thanks !!!
